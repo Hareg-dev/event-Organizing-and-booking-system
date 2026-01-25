@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventHub API Test Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-section h2 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .test-group {
+            margin-bottom: 15px;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .test-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border-left: 4px solid #f44336;
+        }
+        
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .auth-status {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .clear-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 10px;
+        }
+        
+        .run-all-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 EventHub API Test Suite</h1>
+        
+        <div class="auth-status" id="authStatus">
+            Authentication Status: <span id="authStatusText">Checking...</span>
+        </div>
+        
+        <button class="run-all-btn" onclick="runAllTests()">Run All Tests</button>
+        
+        <!-- Authentication Tests -->
+        <div class="test-section">
+            <h2>🔐 Authentication API Tests</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="testAuthCheck()">Check Auth Status</button>
+                <button class="test-button" onclick="testLogin()">Test Login</button>
+                <button class="test-button" onclick="testRegister()">Test Register</button>
+                <button class="test-button" onclick="testLogout()">Test Logout</button>
+                <button class="test-button" onclick="testInvalidLogin()">Test Invalid Login</button>
+            </div>
+            <button class="clear-btn" onclick="clearResults('authResults')">Clear</button>
+            <div class="results" id="authResults"></div>
+        </div>
+        
+        <!-- Events API Tests -->
+        <div class="test-section">
+            <h2>🎉 Events API Tests</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="testGetAllEvents()">Get All Events</button>
+                <button class="test-button" onclick="testGetEventById()">Get Event by ID</button>
+                <button class="test-button" onclick="testGetFeaturedEvents()">Get Featured Events</button>
+                <button class="test-button" onclick="testGetCategories()">Get Categories</button>
+                <button class="test-button" onclick="testSearchEvents()">Search Events</button>
+                <button class="test-button" onclick="testCreateEvent()">Create Event</button>
+                <button class="test-button" onclick="testUpdateEvent()">Update Event</button>
+                <button class="test-button" onclick="testDeleteEvent()">Delete Event</button>
+            </div>
+            <button class="clear-btn" onclick="clearResults('eventsResults')">Clear</button>
+            <div class="results" id="eventsResults"></div>
+        </div>
+        
+        <!-- Bookings API Tests -->
+        <div class="test-section">
+            <h2>🎫 Bookings API Tests</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="testCreateBooking()">Create Booking</button>
+                <button class="test-button" onclick="testGetUserBookings()">Get User Bookings</button>
+                <button class="test-button" onclick="testGetBookingById()">Get Booking by ID</button>
+                <button class="test-button" onclick="testGetEventBookings()">Get Event Bookings</button>
+                <button class="test-button" onclick="testConfirmBooking()">Confirm Booking</button>
+                <button class="test-button" onclick="testCancelBooking()">Cancel Booking</button>
+                <button class="test-button" onclick="testGenerateTicket()">Generate Ticket</button>
+            </div>
+            <button class="clear-btn" onclick="clearResults('bookingsResults')">Clear</button>
+            <div class="results" id="bookingsResults"></div>
+        </div>
+        
+        <!-- Admin API Tests -->
+        <div class="test-section">
+            <h2>👑 Admin API Tests</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="testGetSystemStats()">Get System Stats</button>
+                <button class="test-button" onclick="testGetAllUsers()">Get All Users</button>
+                <button class="test-button" onclick="testGetAllEventsAdmin()">Get All Events (Admin)</button>
+                <button class="test-button" onclick="testChangeUserRole()">Change User Role</button>
+                <button class="test-button" onclick="testDeleteUser()">Delete User</button>
+            </div>
+            <button class="clear-btn" onclick="clearResults('adminResults')">Clear</button>
+            <div class="results" id="adminResults"></div>
+        </div>
+        
+        <!-- Reviews API Tests -->
+        <div class="test-section">
+            <h2>⭐ Reviews API Tests</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="testCreateReview()">Create Review</button>
+                <button class="test-button" onclick="testGetEventReviews()">Get Event Reviews</button>
+                <button class="test-button" onclick="testGetUserReviews()">Get User Reviews</button>
+                <button class="test-button" onclick="testDeleteReview()">Delete Review</button>
+            </div>
+            <button class="clear-btn" onclick="clearResults('reviewsResults')">Clear</button>
+            <div class="results" id="reviewsResults"></div>
+        </div>
+        
+        <!-- Favorites API Tests -->
+        <div class="test-section">
+            <h2>❤️ Favorites API Tests</h2>
+            <div class="test-group">
+                <button class="test-button" onclick="testAddFavorite()">Add Favorite</button>
+                <button class="test-button" onclick="testGetUserFavorites()">Get User Favorites</button>
+                <button class="test-button" onclick="testCheckFavorite()">Check if Favorite</button>
+                <button class="test-button" onclick="testRemoveFavorite()">Remove Favorite</button>
+            </div>
+            <button class="clear-btn" onclick="clearResults('favoritesResults')">Clear</button>
+            <div class="results" id="favoritesResults"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let currentUser = null;
+        let testEventId = null;
+        let testBookingId = null;
+        let testReviewId = null;
+
+        // Utility functions
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const resultItem = document.createElement('div');
+            resultItem.className = `result-item ${type}`;
+            resultItem.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            container.appendChild(resultItem);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                const data = await response.json();
+                return { response, data, status: response.status };
+            } catch (error) {
+                return { error: error.message, status: 0 };
+            }
+        }
+
+        // Authentication Tests
+        async function testAuthCheck() {
+            const result = await makeRequest(`${API_BASE}/auth.php?action=check`);
+            if (result.error) {
+                addResult('authResults', `Auth Check Failed: ${result.error}`, 'error');
+            } else {
+                currentUser = result.data.logged_in ? result.data.user : null;
+                updateAuthStatus();
+                addResult('authResults', `Auth Check: ${JSON.stringify(result.data)}`, 'success');
+            }
+        }
+
+        async function testLogin() {
+            const loginData = {
+                action: 'login',
+                email: 'admin@eventhub.com',
+                password: 'admin123'
+            };
+            
+            const result = await makeRequest(`${API_BASE}/auth.php`, {
+                method: 'POST',
+                body: JSON.stringify(loginData)
+            });
+            
+            if (result.error) {
+                addResult('authResults', `Login Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                currentUser = result.data.user;
+                updateAuthStatus();
+                addResult('authResults', `Login Success: ${JSON.stringify(result.data)}`, 'success');
+            } else {
+                addResult('authResults', `Login Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testRegister() {
+            const registerData = {
+                action: 'register',
+                email: `test${Date.now()}@example.com`,
+                password: 'test123',
+                first_name: 'Test',
+                last_name: 'User',
+                phone: '1234567890',
+                role: 'user'
+            };
+            
+            const result = await makeRequest(`${API_BASE}/auth.php`, {
+                method: 'POST',
+                body: JSON.stringify(registerData)
+            });
+            
+            if (result.error) {
+                addResult('authResults', `Register Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('authResults', `Register Success: ${JSON.stringify(result.data)}`, 'success');
+            } else {
+                addResult('authResults', `Register Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testLogout() {
+            const result = await makeRequest(`${API_BASE}/auth.php`, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'logout' })
+            });
+            
+            if (result.error) {
+                addResult('authResults', `Logout Failed: ${result.error}`, 'error');
+            } else {
+                currentUser = null;
+                updateAuthStatus();
+                addResult('authResults', `Logout Success: ${JSON.stringify(result.data)}`, 'success');
+            }
+        }
+
+        async function testInvalidLogin() {
+            const loginData = {
+                action: 'login',
+                email: 'invalid@example.com',
+                password: 'wrongpassword'
+            };
+            
+            const result = await makeRequest(`${API_BASE}/auth.php`, {
+                method: 'POST',
+                body: JSON.stringify(loginData)
+            });
+            
+            if (result.data && !result.data.success) {
+                addResult('authResults', `Invalid Login Test Passed: ${result.data.message}`, 'success');
+            } else {
+                addResult('authResults', `Invalid Login Test Failed: Should have failed`, 'error');
+            }
+        }
+
+        // Events Tests
+        async function testGetAllEvents() {
+            const result = await makeRequest(`${API_BASE}/events.php`);
+            if (result.error) {
+                addResult('eventsResults', `Get All Events Failed: ${result.error}`, 'error');
+            } else {
+                if (result.data.length > 0) {
+                    testEventId = result.data[0].id;
+                }
+                addResult('eventsResults', `Get All Events Success: Found ${result.data.length} events`, 'success');
+            }
+        }
+
+        async function testGetEventById() {
+            if (!testEventId) {
+                await testGetAllEvents();
+            }
+            
+            if (!testEventId) {
+                addResult('eventsResults', `Get Event by ID Failed: No test event ID available`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/events.php?id=${testEventId}`);
+            if (result.error) {
+                addResult('eventsResults', `Get Event by ID Failed: ${result.error}`, 'error');
+            } else {
+                addResult('eventsResults', `Get Event by ID Success: ${result.data.title}`, 'success');
+            }
+        }
+
+        async function testGetFeaturedEvents() {
+            const result = await makeRequest(`${API_BASE}/events.php?featured=1&limit=3`);
+            if (result.error) {
+                addResult('eventsResults', `Get Featured Events Failed: ${result.error}`, 'error');
+            } else {
+                addResult('eventsResults', `Get Featured Events Success: Found ${result.data.length} featured events`, 'success');
+            }
+        }
+
+        async function testGetCategories() {
+            const result = await makeRequest(`${API_BASE}/events.php?categories=1`);
+            if (result.error) {
+                addResult('eventsResults', `Get Categories Failed: ${result.error}`, 'error');
+            } else {
+                addResult('eventsResults', `Get Categories Success: Found ${result.data.length} categories`, 'success');
+            }
+        }
+
+        async function testSearchEvents() {
+            const result = await makeRequest(`${API_BASE}/events.php?search=music&category=music&limit=5`);
+            if (result.error) {
+                addResult('eventsResults', `Search Events Failed: ${result.error}`, 'error');
+            } else {
+                addResult('eventsResults', `Search Events Success: Found ${result.data.length} events`, 'success');
+            }
+        }
+
+        async function testCreateEvent() {
+            if (!currentUser || currentUser.role === 'user') {
+                addResult('eventsResults', `Create Event Failed: Need organizer/admin login`, 'error');
+                return;
+            }
+            
+            const eventData = {
+                title: `Test Event ${Date.now()}`,
+                description: 'This is a test event created by API test suite',
+                date_start: '2024-12-31 20:00:00',
+                date_end: '2024-12-31 23:00:00',
+                location: 'Test Venue',
+                city: 'Test City',
+                category_id: 1,
+                image_url: 'https://via.placeholder.com/800x400',
+                status: 'published',
+                is_featured: 0,
+                ticket_types: [
+                    {
+                        name: 'General',
+                        price: 50.00,
+                        quantity: 100,
+                        description: 'General admission'
+                    }
+                ]
+            };
+            
+            const result = await makeRequest(`${API_BASE}/events.php`, {
+                method: 'POST',
+                body: JSON.stringify(eventData)
+            });
+            
+            if (result.error) {
+                addResult('eventsResults', `Create Event Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                testEventId = result.data.event_id;
+                addResult('eventsResults', `Create Event Success: Event ID ${result.data.event_id}`, 'success');
+            } else {
+                addResult('eventsResults', `Create Event Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testUpdateEvent() {
+            if (!testEventId) {
+                addResult('eventsResults', `Update Event Failed: No test event ID`, 'error');
+                return;
+            }
+            
+            const updateData = {
+                title: `Updated Test Event ${Date.now()}`,
+                description: 'This event has been updated'
+            };
+            
+            const result = await makeRequest(`${API_BASE}/events.php?id=${testEventId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updateData)
+            });
+            
+            if (result.error) {
+                addResult('eventsResults', `Update Event Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('eventsResults', `Update Event Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('eventsResults', `Update Event Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testDeleteEvent() {
+            if (!testEventId) {
+                addResult('eventsResults', `Delete Event Failed: No test event ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/events.php?id=${testEventId}`, {
+                method: 'DELETE'
+            });
+            
+            if (result.error) {
+                addResult('eventsResults', `Delete Event Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('eventsResults', `Delete Event Success: ${result.data.message}`, 'success');
+                testEventId = null;
+            } else {
+                addResult('eventsResults', `Delete Event Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        // Booking Tests
+        async function testCreateBooking() {
+            if (!currentUser) {
+                addResult('bookingsResults', `Create Booking Failed: Need login`, 'error');
+                return;
+            }
+            
+            if (!testEventId) {
+                await testGetAllEvents();
+            }
+            
+            if (!testEventId) {
+                addResult('bookingsResults', `Create Booking Failed: No test event available`, 'error');
+                return;
+            }
+            
+            const bookingData = {
+                event_id: testEventId,
+                ticket_type_id: 1,
+                quantity: 2,
+                payment_method: 'card'
+            };
+            
+            const result = await makeRequest(`${API_BASE}/bookings.php`, {
+                method: 'POST',
+                body: JSON.stringify(bookingData)
+            });
+            
+            if (result.error) {
+                addResult('bookingsResults', `Create Booking Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                testBookingId = result.data.booking_id;
+                addResult('bookingsResults', `Create Booking Success: Booking ID ${result.data.booking_id}`, 'success');
+            } else {
+                addResult('bookingsResults', `Create Booking Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testGetUserBookings() {
+            if (!currentUser) {
+                addResult('bookingsResults', `Get User Bookings Failed: Need login`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/bookings.php?user_id=${currentUser.id}`);
+            if (result.error) {
+                addResult('bookingsResults', `Get User Bookings Failed: ${result.error}`, 'error');
+            } else {
+                addResult('bookingsResults', `Get User Bookings Success: Found ${result.data.length} bookings`, 'success');
+            }
+        }
+
+        async function testGetBookingById() {
+            if (!testBookingId) {
+                addResult('bookingsResults', `Get Booking by ID Failed: No test booking ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/bookings.php?id=${testBookingId}`);
+            if (result.error) {
+                addResult('bookingsResults', `Get Booking by ID Failed: ${result.error}`, 'error');
+            } else {
+                addResult('bookingsResults', `Get Booking by ID Success: ${JSON.stringify(result.data)}`, 'success');
+            }
+        }
+
+        async function testGetEventBookings() {
+            if (!testEventId) {
+                addResult('bookingsResults', `Get Event Bookings Failed: No test event ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/bookings.php?event_id=${testEventId}`);
+            if (result.error) {
+                addResult('bookingsResults', `Get Event Bookings Failed: ${result.error}`, 'error');
+            } else {
+                addResult('bookingsResults', `Get Event Bookings Success: Found ${result.data.length} bookings`, 'success');
+            }
+        }
+
+        async function testConfirmBooking() {
+            if (!testBookingId) {
+                addResult('bookingsResults', `Confirm Booking Failed: No test booking ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/bookings.php?id=${testBookingId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ action: 'confirm' })
+            });
+            
+            if (result.error) {
+                addResult('bookingsResults', `Confirm Booking Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('bookingsResults', `Confirm Booking Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('bookingsResults', `Confirm Booking Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testCancelBooking() {
+            if (!testBookingId) {
+                addResult('bookingsResults', `Cancel Booking Failed: No test booking ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/bookings.php?id=${testBookingId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ action: 'cancel' })
+            });
+            
+            if (result.error) {
+                addResult('bookingsResults', `Cancel Booking Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('bookingsResults', `Cancel Booking Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('bookingsResults', `Cancel Booking Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testGenerateTicket() {
+            if (!testBookingId) {
+                addResult('bookingsResults', `Generate Ticket Failed: No test booking ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/bookings.php`, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: 'generate_ticket',
+                    booking_id: testBookingId 
+                })
+            });
+            
+            if (result.error) {
+                addResult('bookingsResults', `Generate Ticket Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('bookingsResults', `Generate Ticket Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('bookingsResults', `Generate Ticket Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        // Admin Tests
+        async function testGetSystemStats() {
+            const result = await makeRequest(`${API_BASE}/admin.php?stats=1`);
+            if (result.error) {
+                addResult('adminResults', `Get System Stats Failed: ${result.error}`, 'error');
+            } else if (result.status === 401 || result.status === 403) {
+                addResult('adminResults', `Get System Stats Failed: ${result.data.message}`, 'error');
+            } else {
+                addResult('adminResults', `Get System Stats Success: ${JSON.stringify(result.data)}`, 'success');
+            }
+        }
+
+        async function testGetAllUsers() {
+            const result = await makeRequest(`${API_BASE}/admin.php?users=1`);
+            if (result.error) {
+                addResult('adminResults', `Get All Users Failed: ${result.error}`, 'error');
+            } else if (result.status === 401 || result.status === 403) {
+                addResult('adminResults', `Get All Users Failed: ${result.data.message}`, 'error');
+            } else {
+                addResult('adminResults', `Get All Users Success: Found ${result.data.length} users`, 'success');
+            }
+        }
+
+        async function testGetAllEventsAdmin() {
+            const result = await makeRequest(`${API_BASE}/admin.php?events=1`);
+            if (result.error) {
+                addResult('adminResults', `Get All Events (Admin) Failed: ${result.error}`, 'error');
+            } else if (result.status === 401 || result.status === 403) {
+                addResult('adminResults', `Get All Events (Admin) Failed: ${result.data.message}`, 'error');
+            } else {
+                addResult('adminResults', `Get All Events (Admin) Success: Found ${result.data.length} events`, 'success');
+            }
+        }
+
+        async function testChangeUserRole() {
+            const result = await makeRequest(`${API_BASE}/admin.php`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    action: 'change_user_role',
+                    user_id: 2,
+                    role: 'organizer'
+                })
+            });
+            
+            if (result.error) {
+                addResult('adminResults', `Change User Role Failed: ${result.error}`, 'error');
+            } else if (result.status === 401 || result.status === 403) {
+                addResult('adminResults', `Change User Role Failed: ${result.data.message}`, 'error');
+            } else if (result.data.success) {
+                addResult('adminResults', `Change User Role Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('adminResults', `Change User Role Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testDeleteUser() {
+            // Create a test user first
+            const registerData = {
+                action: 'register',
+                email: `delete-test-${Date.now()}@example.com`,
+                password: 'test123',
+                first_name: 'Delete',
+                last_name: 'Test',
+                role: 'user'
+            };
+            
+            const registerResult = await makeRequest(`${API_BASE}/auth.php`, {
+                method: 'POST',
+                body: JSON.stringify(registerData)
+            });
+            
+            if (!registerResult.data.success) {
+                addResult('adminResults', `Delete User Failed: Could not create test user`, 'error');
+                return;
+            }
+            
+            const userId = registerResult.data.user_id;
+            const result = await makeRequest(`${API_BASE}/admin.php?user_id=${userId}`, {
+                method: 'DELETE'
+            });
+            
+            if (result.error) {
+                addResult('adminResults', `Delete User Failed: ${result.error}`, 'error');
+            } else if (result.status === 401 || result.status === 403) {
+                addResult('adminResults', `Delete User Failed: ${result.data.message}`, 'error');
+            } else if (result.data.success) {
+                addResult('adminResults', `Delete User Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('adminResults', `Delete User Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        // Reviews Tests
+        async function testCreateReview() {
+            if (!currentUser) {
+                addResult('reviewsResults', `Create Review Failed: Need login`, 'error');
+                return;
+            }
+            
+            if (!testEventId) {
+                await testGetAllEvents();
+            }
+            
+            if (!testEventId) {
+                addResult('reviewsResults', `Create Review Failed: No test event available`, 'error');
+                return;
+            }
+            
+            const reviewData = {
+                event_id: testEventId,
+                rating: 5,
+                comment: 'This is a test review created by API test suite'
+            };
+            
+            const result = await makeRequest(`${API_BASE}/reviews.php`, {
+                method: 'POST',
+                body: JSON.stringify(reviewData)
+            });
+            
+            if (result.error) {
+                addResult('reviewsResults', `Create Review Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                testReviewId = result.data.review_id;
+                addResult('reviewsResults', `Create Review Success: Review ID ${result.data.review_id}`, 'success');
+            } else {
+                addResult('reviewsResults', `Create Review Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testGetEventReviews() {
+            if (!testEventId) {
+                addResult('reviewsResults', `Get Event Reviews Failed: No test event ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/reviews.php?event_id=${testEventId}`);
+            if (result.error) {
+                addResult('reviewsResults', `Get Event Reviews Failed: ${result.error}`, 'error');
+            } else {
+                addResult('reviewsResults', `Get Event Reviews Success: Found ${result.data.length} reviews`, 'success');
+            }
+        }
+
+        async function testGetUserReviews() {
+            if (!currentUser) {
+                addResult('reviewsResults', `Get User Reviews Failed: Need login`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/reviews.php?user_id=${currentUser.id}`);
+            if (result.error) {
+                addResult('reviewsResults', `Get User Reviews Failed: ${result.error}`, 'error');
+            } else {
+                addResult('reviewsResults', `Get User Reviews Success: Found ${result.data.length} reviews`, 'success');
+            }
+        }
+
+        async function testDeleteReview() {
+            if (!testReviewId) {
+                addResult('reviewsResults', `Delete Review Failed: No test review ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/reviews.php?id=${testReviewId}`, {
+                method: 'DELETE'
+            });
+            
+            if (result.error) {
+                addResult('reviewsResults', `Delete Review Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('reviewsResults', `Delete Review Success: ${result.data.message}`, 'success');
+                testReviewId = null;
+            } else {
+                addResult('reviewsResults', `Delete Review Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        // Favorites Tests
+        async function testAddFavorite() {
+            if (!currentUser) {
+                addResult('favoritesResults', `Add Favorite Failed: Need login`, 'error');
+                return;
+            }
+            
+            if (!testEventId) {
+                await testGetAllEvents();
+            }
+            
+            if (!testEventId) {
+                addResult('favoritesResults', `Add Favorite Failed: No test event available`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/favorites.php`, {
+                method: 'POST',
+                body: JSON.stringify({ event_id: testEventId })
+            });
+            
+            if (result.error) {
+                addResult('favoritesResults', `Add Favorite Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('favoritesResults', `Add Favorite Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('favoritesResults', `Add Favorite Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        async function testGetUserFavorites() {
+            if (!currentUser) {
+                addResult('favoritesResults', `Get User Favorites Failed: Need login`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/favorites.php`);
+            if (result.error) {
+                addResult('favoritesResults', `Get User Favorites Failed: ${result.error}`, 'error');
+            } else {
+                addResult('favoritesResults', `Get User Favorites Success: Found ${result.data.length} favorites`, 'success');
+            }
+        }
+
+        async function testCheckFavorite() {
+            if (!currentUser || !testEventId) {
+                addResult('favoritesResults', `Check Favorite Failed: Need login and event ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/favorites.php?check=1&event_id=${testEventId}`);
+            if (result.error) {
+                addResult('favoritesResults', `Check Favorite Failed: ${result.error}`, 'error');
+            } else {
+                addResult('favoritesResults', `Check Favorite Success: Is favorite = ${result.data.is_favorite}`, 'success');
+            }
+        }
+
+        async function testRemoveFavorite() {
+            if (!currentUser || !testEventId) {
+                addResult('favoritesResults', `Remove Favorite Failed: Need login and event ID`, 'error');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/favorites.php?event_id=${testEventId}`, {
+                method: 'DELETE'
+            });
+            
+            if (result.error) {
+                addResult('favoritesResults', `Remove Favorite Failed: ${result.error}`, 'error');
+            } else if (result.data.success) {
+                addResult('favoritesResults', `Remove Favorite Success: ${result.data.message}`, 'success');
+            } else {
+                addResult('favoritesResults', `Remove Favorite Failed: ${result.data.message}`, 'error');
+            }
+        }
+
+        // Utility functions
+        function updateAuthStatus() {
+            const statusText = document.getElementById('authStatusText');
+            if (currentUser) {
+                statusText.innerHTML = `✅ Logged in as ${currentUser.first_name} ${currentUser.last_name} (${currentUser.role})`;
+                statusText.style.color = '#4caf50';
+            } else {
+                statusText.innerHTML = '❌ Not logged in';
+                statusText.style.color = '#f44336';
+            }
+        }
+
+        async function runAllTests() {
+            // Clear all results
+            ['authResults', 'eventsResults', 'bookingsResults', 'adminResults', 'reviewsResults', 'favoritesResults'].forEach(clearResults);
+            
+            addResult('authResults', '🚀 Starting comprehensive API test suite...', 'info');
+            
+            // Auth tests
+            await testAuthCheck();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testLogin();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Events tests
+            await testGetAllEvents();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testGetEventById();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testGetFeaturedEvents();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testGetCategories();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Bookings tests
+            await testCreateBooking();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testGetUserBookings();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Reviews tests
+            await testCreateReview();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testGetEventReviews();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Favorites tests
+            await testAddFavorite();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testGetUserFavorites();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Admin tests (if admin)
+            if (currentUser && currentUser.role === 'admin') {
+                await testGetSystemStats();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await testGetAllUsers();
+            }
+            
+            addResult('authResults', '✅ All tests completed!', 'success');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            testAuthCheck();
+        });
+    </script>
+</body>
+</html>
